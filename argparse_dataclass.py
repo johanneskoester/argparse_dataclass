@@ -118,6 +118,20 @@ Using a custom type converter:
     >>> print(parser.parse_args(["--name", "john doe"]))
     Options(name='John Doe')
 
+Parsing a list of values:
+
+.. code-block:: pycon
+
+    >>> from dataclasses import dataclass, field
+    >>> from argparse_dataclass import ArgumentParser
+    >>> @dataclass
+    ... class Options:
+    ...     names: list[str] = field(metadata=dict(type=str, nargs="+"))
+    ...
+    >>> parser = ArgumentParser(Options)
+    >>> print(parser.parse_args(["--names", "john", "jane"]))
+    Options(names=['john', 'jane'])
+
 Configuring a flag to have a default value of True:
 
 .. code-block:: pycon
