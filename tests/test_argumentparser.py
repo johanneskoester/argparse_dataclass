@@ -3,7 +3,7 @@ import unittest
 import datetime as dt
 from dataclasses import dataclass, field
 
-from typing import List, Optional, Union, Literal
+from typing import Optional, Union, Literal
 from argparse_dataclass import ArgumentParser
 
 
@@ -76,7 +76,7 @@ class ArgumentParserTests(unittest.TestCase):
         @dataclass
         class Args:
             name: str
-            friends: List[str] = field(metadata=dict(nargs=2))
+            friends: list[str] = field(metadata=dict(nargs=2))
 
         args = ["--name", "Sam", "--friends", "pippin", "Frodo"]
         params = ArgumentParser(Args).parse_args(args)
@@ -87,7 +87,7 @@ class ArgumentParserTests(unittest.TestCase):
         @dataclass
         class Args:
             name: str
-            friends: List[str] = field(metadata=dict(nargs="+"))
+            friends: list[str] = field(metadata=dict(nargs="+"))
 
         args = ["--name", "Sam", "--friends", "pippin", "Frodo"]
         params = ArgumentParser(Args).parse_args(args)
@@ -142,10 +142,6 @@ class ArgumentParserTests(unittest.TestCase):
         params = ArgumentParser(Options).parse_args(["--name", "john doe"])
         self.assertEqual(params.name, "John Doe")
 
-    @unittest.skipIf(
-        sys.version_info[:2] == (3, 6),
-        "Python 3.6 does not have datetime.fromisoformat()",
-    )
     def test_default_factory(self):
         @dataclass
         class Parameters:
@@ -301,6 +297,16 @@ class ArgumentParserTests(unittest.TestCase):
             a_or_3: Literal["a", "b"] = field(metadata={"choices": ["a", "b"]})
 
         self.assertRaises(ValueError, lambda: ArgumentParser(Options))
+
+    def test_keep_underscores(self):
+        @dataclass
+        class Args:
+            num_of_foo: int = field(metadata={"keep_underscores": True})
+            is_fun: bool = field(default=True, metadata={"keep_underscores": True})
+
+        params = ArgumentParser(Args).parse_args(["--num_of_foo=10", "--no-is_fun"])
+        self.assertEqual(10, params.num_of_foo)
+        self.assertFalse(params.is_fun)
 
 
 if __name__ == "__main__":
